@@ -3,4 +3,4 @@ from middleware import fronts
 from urls import routes
 
 application = Application(routes, fronts)
-application.run()
+application.run(port=8000)
