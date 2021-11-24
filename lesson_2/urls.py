@@ -1,15 +1,17 @@
-from views import index_view, tools_view, Other, registration_view, login_view
+from views import index_view, Other, registration_view, login_view, ToolsView, CreateCategory, CategoryList, \
+    ProductsList, CopyProduct, CreateProduct
 
 routes = {
     '/': index_view,
-    '/category/power-tool/': index_view,
     '/user/registration/': registration_view,
     '/user/login/': login_view,
+    '/other/': Other(),
 
-    '/category/hand-tool/': tools_view,
-    '/category/measuring-tool/': tools_view,
-    '/category/machine-tools/': tools_view,
-    '/category/expendable-materials/': tools_view,
+    '/category': ToolsView(),
+    '/category/list/': CategoryList(),
+    '/category/create/': CreateCategory(),
 
-    '/other/': Other()
+    '/products/list/': ProductsList(),
+    '/products/create/': CreateProduct(),
+    '/products/copy': CopyProduct(),
 }

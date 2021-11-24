@@ -1,9 +1,7 @@
 <div class="nav-scroller py-1 mb-2">
     <nav class="nav d-flex justify-content-between">
-        <a class="p-2 link-secondary" href="/category/power-tool/">Электроинструмент</a>
-        <a class="p-2 link-secondary" href="/category/hand-tool/">Ручной инструмент</a>
-        <a class="p-2 link-secondary" href="/category/measuring-tool/">Измерительный инструмент</a>
-        <a class="p-2 link-secondary" href="/category/machine-tools/">Станки</a>
-        <a class="p-2 link-secondary" href="/category/expendable-materials/">Расходные материалы</a>
+        {% for i in categories %}
+            <a class="p-2 link-secondary" href="/category?category_id={{ i.id }}">{{ i.name }}</a>
+        {% endfor %}
     </nav>
 </div>

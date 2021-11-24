@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>
+        <div class="d-flex justify-content-between">
+            <h3>Категории товаров</h3>
+            <div>
+                <a href="/category/create/">Добавить категорию</a>
+                &nbsp;
+                <a href="/">Главная</a>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col" style="width: 100%">Категория</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for i in categories %}
+                <tr>
+                    <th scope="row">{{ i.id }}</th>
+                    <td>{{ i.name }}</td>
+                    <td>{# <a href="#">Изменить</a> #}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

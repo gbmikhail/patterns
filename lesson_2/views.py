@@ -1,45 +1,13 @@
 from framework import Jinja2Templates, Request
+from patterns.сreational_patterns import Engine
 
 templates = Jinja2Templates(directory='templates/')
+site = Engine()
 
 
-def index_view(request: Request):
-    print(request)
-    products = [
-        {
-            'title': 'Metabo KGS 216 M',
-            'text': 'Торцовая пила Metabo KGS 216 M',
-            'image': 'c9155a41899f7e0062e8d7676eccc567.jpg',
-            'price': 23299,
-        },
-        {
-            'title': 'Stanley STGS9125',
-            'text': 'Угловая шлифовальная машина Stanley STGS9125',
-            'image': '126a408b19af26aa9c95716da5bf0bc7.jpg',
-            'price': 3059,
-        },
-        {
-            'title': 'DeWalt DCD771D2',
-            'text': 'Аккумуляторная дрель-шуруповерт DeWalt DCD771D2',
-            'image': '6a90b241830c10350ed0c247ac253796.png',
-            'price': 11289,
-        },
-        {
-            'title': 'Bosch GST 150 ВСЕ',
-            'text': 'Лобзик Bosch GST 150 ВСЕ',
-            'image': 'ebda01400c7d7b510acf55422bd91ac9.jpg',
-            'price': 17199,
-        },
-        {
-            'title': 'Bosch GDX + GBH 180-LI',
-            'text': 'Аккумуляторный набор Bosch GDX 180-LI + GBH 180-LI',
-            'image': 'b62279870d46915744223ef5a7779841.jpg',
-            'price': 32989,
-        },
-    ]
-
+def index_view(_request: Request):
     context = {
-        'products': products,
+        'categories': site.categories
     }
     content = templates.template_response('index.html', context=context)
     return '200 OK', [content.encode('utf-8')]
@@ -57,10 +25,20 @@ def login_view(request: Request):
     return index_view(request)
 
 
-def tools_view(request: Request):
-    print(request)
-    content = templates.template_response('tools.html')
-    return '200 OK', [content.encode('utf-8')]
+class ToolsView:
+    def __init__(self, _category_id=None):
+        # self.category_id = category_id
+        pass
+
+    def __call__(self, request: Request):
+        category_id = int(request.params['category_id'])
+        products = site.get_products_by_category_id(category_id)
+        context = {
+            'products': products,
+            'categories': site.categories
+        }
+        content = templates.template_response('tools.html', context=context)
+        return '200 OK', [content.encode('utf-8')]
 
 
 class Other:
@@ -68,3 +46,77 @@ class Other:
         print(request)
         content = templates.template_response('tools.html')
         return '200 OK', [content.encode('utf-8')]
+
+
+class CategoryList:
+    def __call__(self, request):
+        context = {
+            'categories': site.categories,
+        }
+        content = templates.template_response('category_list.html', context=context)
+        return '200 OK', [content.encode('utf-8')]
+
+
+class CreateProduct:
+    def __call__(self, request: Request):
+        if request.method == 'POST':
+            data = request.data
+            category_id = int(data['category_id'])
+
+            category = site.find_category_by_id(category_id)
+            name = data['name']
+            text = data['text']
+            image = data['image']
+            price = float(data['price'])
+
+            product = site.create_product(category, name, text, image, price)
+            site.products.append(product)
+
+            return ProductsList()(request)
+        else:
+            context = {
+                'categories': site.categories,
+            }
+            content = templates.template_response('create_product.html', context=context)
+            return '200 OK', [content.encode('utf-8')]
+
+
+class CreateCategory:
+    def __call__(self, request: Request):
+        if request.method == 'POST':
+            data = request.data
+
+            name = data['title']
+            new_category = site.create_category(name)
+            site.categories.append(new_category)
+
+            return CategoryList()(request)
+        else:
+            content = templates.template_response('create_category.html')
+            return '200 OK', [content.encode('utf-8')]
+
+
+class ProductsList:
+    def __call__(self, request):
+        try:
+            context = {
+                'products': site.products,
+            }
+            content = templates.template_response('products_list.html', context=context)
+            return '200 OK', [content.encode('utf-8')]
+        except KeyError:
+            return '200 OK', 'No products have been added yet'
+
+
+class CopyProduct:
+    def __call__(self, request):
+        try:
+            product_name = request.params['product_name']
+            old = site.get_product_by_name(product_name)
+            if old:
+                new_product = old.clone()
+                new_product.name = f'copy_{new_product.name}'
+                site.products.append(new_product)
+            return ProductsList()(request)
+        except KeyError:
+            return '200 OK', 'No courses have been added yet'
