@@ -1,6 +1,8 @@
 from framework import Application
 from middleware import fronts
-from urls import routes
+from patterns.structural_patterns import AppRoute
+import views
 
-application = Application(routes, fronts)
+
+application = Application(AppRoute.routes, fronts)
 application.run(port=8000)
