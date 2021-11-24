@@ -12,11 +12,18 @@ class Category:
 
 class ProductPrototype:
     def clone(self):
-        return copy.deepcopy(self)
+        Product.auto_id += 1
+        product = copy.deepcopy(self)
+        product.id = Product.auto_id
+        return product
 
 
 class Product(ProductPrototype):
+    auto_id = 0
+
     def __init__(self, category: Category, name: str, text: str, image: str, price: float):
+        Product.auto_id += 1
+        self.id = Product.auto_id
         self.category = category
         self.name = name
         self.text = text
@@ -65,3 +72,9 @@ class Engine:
             if i.name == name:
                 return i
         raise Exception(f'Нет товара с именем {name}')
+
+    def get_product_by_id(self, product_id: int) -> Product:
+        for i in self.products:
+            if i.id == product_id:
+                return i
+        raise Exception(f'Нет товара с именем {product_id}')

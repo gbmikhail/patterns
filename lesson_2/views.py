@@ -111,8 +111,8 @@ class ProductsList:
 class CopyProduct:
     def __call__(self, request):
         try:
-            product_name = request.params['product_name']
-            old = site.get_product_by_name(product_name)
+            product_id = int(request.params['product_id'])
+            old = site.get_product_by_id(product_id)
             if old:
                 new_product = old.clone()
                 new_product.name = f'copy_{new_product.name}'
