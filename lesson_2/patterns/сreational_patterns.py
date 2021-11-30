@@ -1,5 +1,39 @@
 import copy
 
+from patterns.behavioral_patterns import Subject, ConsoleWriter
+
+
+class User:
+    def __init__(self, name, password):
+        self.name = name
+        self.password = password
+
+    def __str__(self):
+        return self.name
+
+
+class UserAdministrator(User):
+    pass
+
+
+class UserClient(User):
+    def __init__(self, name, password):
+        self.products = []
+        super().__init__(name, password)
+
+
+class UserFactory:
+    types = {
+        'client': UserClient,
+        'administrator': UserAdministrator
+    }
+
+    # порождающий паттерн Фабричный метод
+    @classmethod
+    def create(cls, type_, name, password):
+        assert type_ in cls.types.keys(), f'{type_} not in {cls.types.keys()}'
+        return cls.types[type_](name, password)
+
 
 class Category:
     auto_id = 0
@@ -18,7 +52,7 @@ class ProductPrototype:
         return product
 
 
-class Product(ProductPrototype):
+class Product(ProductPrototype, Subject):
     auto_id = 0
 
     def __init__(self, category: Category, name: str, text: str, image: str, price: float):
@@ -29,10 +63,21 @@ class Product(ProductPrototype):
         self.text = text
         self.image = image
         self.price = price
+        self.users = []
+        super().__init__()
+
+    def __getitem__(self, item):
+        return self.users[item]
+
+    def add_user(self, user: UserClient):
+        self.users.append(user)
+        user.products.append(self)
+        self.notify()
 
 
 class Engine:
     def __init__(self):
+        self.users = []
         self.categories = [
             Category('Электроинструмент'),
             Category('Ручной инструмент'),
@@ -49,6 +94,11 @@ class Engine:
             Product(category, 'Bosch GST 150 ВСЕ', 'Лобзик Bosch GST 150 ВСЕ', 'ebda01400c7d7b510acf55422bd91ac9.jpg', 17199),
             Product(category, 'Bosch GDX + GBH 180-LI', 'Аккумуляторный набор Bosch GDX 180-LI + GBH 180-LI', 'b62279870d46915744223ef5a7779841.jpg', 32989),
         ]
+
+    @staticmethod
+    def create_user(type_, name, password):
+        return UserFactory.create(type_, name, password)
+
 
     @staticmethod
     def create_category(name: str) -> Category:
@@ -78,3 +128,34 @@ class Engine:
             if i.id == product_id:
                 return i
         raise Exception(f'Нет товара с именем {product_id}')
+
+
+class SingletonByName(type):
+
+    def __init__(cls, name, bases, attrs, **kwargs):
+        super().__init__(name, bases, attrs)
+        cls.__instance = {}
+
+    def __call__(cls, *args, **kwargs):
+        name = None
+        if args:
+            name = args[0]
+        if kwargs:
+            name = kwargs['name']
+
+        if name in cls.__instance:
+            return cls.__instance[name]
+        else:
+            cls.__instance[name] = super().__call__(*args, **kwargs)
+            return cls.__instance[name]
+
+
+class Logger(metaclass=SingletonByName):
+
+    def __init__(self, name, writer=ConsoleWriter()):
+        self.name = name
+        self.writer = writer
+
+    def log(self, text):
+        text = f'log---> {text}'
+        self.writer.write(text)

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div>
+        <div class="d-flex justify-content-between">
+            <h3>Список пользователей</h3>
+            <div>
+                <a href="/user/registration/">Регистрация нового пользователя</a>
+                &nbsp;
+                <a href="/">Главная</a>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col" style="width: 100%">Имя пользователя</th>
+                <th scope="col"></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for i in objects_list %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ i.name }}</td>
+                    <td>{# <a href="#">Изменить</a> #}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

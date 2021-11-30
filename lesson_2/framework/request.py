@@ -10,6 +10,7 @@ class Request(BaseModel):
     headers: dict
     params: dict
     data: dict
+    content_type: str
 
     def __init__(self, environ: dict):
         data = {
@@ -19,7 +20,8 @@ class Request(BaseModel):
             'url': environ['PATH_INFO'],
             'headers': dict(),
             'params': self.get_request_params(environ['QUERY_STRING']),
-            'data': self.get_wsgi_input_data(environ)
+            'data': self.get_wsgi_input_data(environ),
+            'content_type': 'text/html',
         }
         super().__init__(**data)
 

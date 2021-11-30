@@ -46,7 +46,7 @@ class Application:
         for front in self.fronts:
             front(request)
         code, body = view(request)
-        start_response(code, [('Content-Type', 'text/html')])
+        start_response(code, [('Content-Type', request.content_type)])
         return body
 
     def run(self, host: str = '127.0.0.1', port: int = 80):
