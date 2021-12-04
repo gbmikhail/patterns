@@ -1,0 +1,34 @@
+PRAGMA foreign_keys = off;
+BEGIN TRANSACTION;
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE users
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    name VARCHAR (64) NOT NULL UNIQUE,
+    password VARCHAR (64) NOT NULL
+);
+
+INSERT INTO users (name, password) values ('user', 'password');
+
+DROP TABLE IF EXISTS category;
+CREATE TABLE category
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    name VARCHAR (128) NOT NULL UNIQUE
+);
+
+DROP TABLE IF EXISTS product;
+CREATE TABLE product
+(
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+    category_id INTEGER NOT NULL,
+    name VARCHAR (128) NOT NULL,
+    text VARCHAR (255) NOT NULL,
+    image VARCHAR (128),
+    price FLOAT DEFAULT 0,
+    FOREIGN KEY(category_id) REFERENCES category(id)
+);
+
+COMMIT TRANSACTION;
+PRAGMA foreign_keys = on;

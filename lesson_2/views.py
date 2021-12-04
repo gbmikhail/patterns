@@ -1,13 +1,17 @@
 from framework import Jinja2Templates, Request
+from patterns.architectural_system_pattern_unit_of_work import UnitOfWork
 from patterns.behavioral_patterns import CreateView, ListView, BaseSerializer, EmailNotifier, SmsNotifier
 from patterns.structural_patterns import AppRoute, Debug
-from patterns.сreational_patterns import Engine, Logger, UserClient
+from patterns.сreational_patterns import Engine, Logger, UserClient, MapperRegistry
 
 templates = Jinja2Templates(directory='templates/')
 site = Engine()
 logger = Logger('main')
 email_notifier = EmailNotifier()
 sms_notifier = SmsNotifier()
+
+UnitOfWork.new_current()
+UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 
 
 @AppRoute('/')
@@ -27,6 +31,8 @@ class UserCreateView(CreateView):
     def create_obj(self, data: dict):
         user = site.create_user('client', data['email'], data['passwd'])
         site.users.append(user)
+        user.mark_new()
+        UnitOfWork.get_current().commit()
 
 
 @AppRoute('/user/users/')

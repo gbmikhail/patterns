@@ -1,10 +1,16 @@
 import copy
+import sqlite3
 
+from patterns.architectural_system_pattern_mappers import Mapper
+from patterns.architectural_system_pattern_unit_of_work import DomainObject
 from patterns.behavioral_patterns import Subject, ConsoleWriter
 
 
 class User:
-    def __init__(self, name, password):
+    __tablename__ = 'users'
+
+    def __init__(self, name=None, password=None):
+        self.id = None
         self.name = name
         self.password = password
 
@@ -16,7 +22,7 @@ class UserAdministrator(User):
     pass
 
 
-class UserClient(User):
+class UserClient(User, DomainObject):
     def __init__(self, name, password):
         self.products = []
         super().__init__(name, password)
@@ -36,6 +42,7 @@ class UserFactory:
 
 
 class Category:
+    __tablename__ = 'category'
     auto_id = 0
 
     def __init__(self, name):
@@ -53,6 +60,7 @@ class ProductPrototype:
 
 
 class Product(ProductPrototype, Subject):
+    __tablename__ = 'product'
     auto_id = 0
 
     def __init__(self, category: Category, name: str, text: str, image: str, price: float):
@@ -98,7 +106,6 @@ class Engine:
     @staticmethod
     def create_user(type_, name, password):
         return UserFactory.create(type_, name, password)
-
 
     @staticmethod
     def create_category(name: str) -> Category:
@@ -159,3 +166,26 @@ class Logger(metaclass=SingletonByName):
     def log(self, text):
         text = f'log---> {text}'
         self.writer.write(text)
+
+
+connection = sqlite3.connect('patterns.sqlite')
+
+
+# архитектурный системный паттерн - Data Mapper
+class MapperRegistry:
+    mappers = {
+        'user': Mapper,
+        #'category': CategoryMapper
+    }
+
+    @staticmethod
+    def get_mapper(obj):
+        if isinstance(obj, User):
+            return Mapper(connection, User)
+        #if isinstance(obj, Category):
+            #return CategoryMapper(connection)
+
+    @staticmethod
+    def get_current_mapper(name):
+        MapperRegistry.mappers[name](connection, type(obj))
+        return Mapper(connection, MapperRegistry.mappers[name])
